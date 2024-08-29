@@ -106,10 +106,10 @@ a {
   }
 } */
 /* styles/globals.css */
-body {
+/* body {
   font-family: Arial, sans-serif;
   padding: 20px;
-}
+} */
 
 h1 {
   color: #333;
@@ -136,6 +136,27 @@ table th, table td {
 }
 
 table th {
-  background-color: #f2f2f2;
+  background-color: #030000;
   text-align: left;
+}
+
+/* Whole page background */
+body {
+  background-color: #000000; /* Black background color */
+  color: #ffffff; /* White text color */
+  margin: 0; /* Remove default margin */
+  font-family: Arial, sans-serif; /* Optional: Set a default font */
+}
+
+/* Specific section background */
+.black-background {
+  background-color: #b4afaf; /* Black background color */
+  color: #ffffff; /* White text color */
+  padding: 20px; /* Add padding */
+}
+
+.button-container {
+  display: flex;
+  justify-content: center; /* Center buttons horizontally */
+  gap: 30px; /* Adjust spacing between buttons */
 }
