@@ -1,231 +1,377 @@
-// 'use client';
-// import { useEffect, useState } from 'react';
-// import Modal from 'react-bootstrap/Modal';
-// import Button from 'react-bootstrap/Button';
-// import Form from 'react-bootstrap/Form';
-// import Alert from 'react-bootstrap/Alert';
-// import { Container } from 'react-bootstrap';
+'use client'
+import React, { useState, useEffect } from 'react';
+import { Container, Button, Form, Modal, Alert, Table } from 'react-bootstrap';
+import axios from 'axios';
 
-// export default function Dashboard() {
-//   const [pets, setPets] = useState([]);
-//   const [species, setSpecies] = useState([]);
-//   const [breeds, setBreeds] = useState([]);
-//   const [owners, setOwners] = useState([]);
-//   const [showPetModal, setShowPetModal] = useState(false);
-//   const [showOwnerModal, setShowOwnerModal] = useState(false);
-//   const [showSpeciesModal, setShowSpeciesModal] = useState(false);
-//   const [showBreedModal, setShowBreedModal] = useState(false);
-//   const [modalType, setModalType] = useState('');
-//   const [formData, setFormData] = useState({
-//     name: '',
-//     speciesID: '',
-//     breedID: '',
-//     dateOfBirth: '',
-//     ownerID: '',
-//   });
-//   const [ownerFormData, setOwnerFormData] = useState({
-//     ownerName: '',
-//     ownerContactDetails: '',
-//     ownerAddress: '',
-//   });
-//   const [speciesFormData, setSpeciesFormData] = useState({
-//     speciesName: '',
-//   });
-//   const [breedFormData, setBreedFormData] = useState({
-//     breedName: '',
-//     speciesID: '',
-//   });
-//   const [successMessage, setSuccessMessage] = useState('');
-//   const [showAlert, setShowAlert] = useState(false);
+export default function Dashboard() {
+  const [filterType, setFilterType] = useState('pets');
+  const [pets, setPets] = useState([]);
+  const [species, setSpecies] = useState([]);
+  const [breeds, setBreeds] = useState([]);
+  const [owners, setOwners] = useState([]);
+  const [showPetModal, setShowPetModal] = useState(false);
+  const [showOwnerModal, setShowOwnerModal] = useState(false);
+  const [showSpeciesModal, setShowSpeciesModal] = useState(false);
+  const [showBreedModal, setShowBreedModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [showAlert, setShowAlert] = useState(false);
 
-//   useEffect(() => {
-//     fetchPets();
-//     fetchSpecies();
-//     fetchBreeds();
-//     fetchOwners();
-//   }, []);
+  const [formData, setFormData] = useState({
+    name: '',
+    speciesID: '',
+    breedID: '',
+    dateOfBirth: '',
+    ownerID: ''
+  });
+  const [ownerFormData, setOwnerFormData] = useState({
+    ownerName: '',
+    ownerContactDetails: '',
+    ownerAddress: ''
+  });
+  const [speciesFormData, setSpeciesFormData] = useState({
+    speciesName: ''
+  });
+  const [breedFormData, setBreedFormData] = useState({
+    breedName: '',
+    speciesID: ''
+  });
 
-//   // Existing fetch functions...
+  useEffect(() => {
+    // Fetch data from APIs
+    axios.get('/api/pets').then((response) => setPets(response.data));
+    axios.get('/api/species').then((response) => setSpecies(response.data));
+    axios.get('/api/breeds').then((response) => setBreeds(response.data));
+    axios.get('/api/owners').then((response) => setOwners(response.data));
+  }, []);
 
-//   const handleAddSpecies = (e) => {
-//     e.preventDefault();
+  const handleAddOrEditPet = (e) => {
+    e.preventDefault();
+    // Handle add/edit pet logic
+    setShowPetModal(false);
+    setShowAlert(true);
+    setSuccessMessage('Pet added/updated successfully!');
+  };
 
-//     fetch('http://localhost/api/assignment3/pets.php?action=addSpecies', {
-//       method: 'POST',
-//       headers: {
-//         'Content-Type': 'application/x-www-form-urlencoded',
-//       },
-//       body: new URLSearchParams(speciesFormData),
-//     })
-//       .then((response) => response.json())
-//       .then((data) => {
-//         if (data.success) {
-//           fetchSpecies();
-//           setSuccessMessage('Species added successfully!');
-//           setShowAlert(true);
-//           setShowSpeciesModal(false);
-//           setSpeciesFormData({
-//             speciesName: '',
-//           });
-//         } else {
-//           alert('Failed to add species');
-//         }
-//       })
-//       .catch((error) => console.error('Error:', error));
-//   };
+  const handleAddOwner = (e) => {
+    e.preventDefault();
+    // Handle add owner logic
+    setShowOwnerModal(false);
+    setShowAlert(true);
+    setSuccessMessage('Owner added successfully!');
+  };
 
-//   const handleAddBreed = (e) => {
-//     e.preventDefault();
+  const handleAddSpecies = (e) => {
+    e.preventDefault();
+    // Handle add species logic
+    setShowSpeciesModal(false);
+    setShowAlert(true);
+    setSuccessMessage('Species added successfully!');
+  };
 
-//     fetch('http://localhost/api/assignment3/pets.php?action=addBreed', {
-//       method: 'POST',
-//       headers: {
-//         'Content-Type': 'application/x-www-form-urlencoded',
-//       },
-//       body: new URLSearchParams(breedFormData),
-//     })
-//       .then((response) => response.json())
-//       .then((data) => {
-//         if (data.success) {
-//           fetchBreeds();
-//           setSuccessMessage('Breed added successfully!');
-//           setShowAlert(true);
-//           setShowBreedModal(false);
-//           setBreedFormData({
-//             breedName: '',
-//             speciesID: '',
-//           });
-//         } else {
-//           alert('Failed to add breed');
-//         }
-//       })
-//       .catch((error) => console.error('Error:', error));
-//   };
+  const handleAddBreed = (e) => {
+    e.preventDefault();
+    // Handle add breed logic
+    setShowBreedModal(false);
+    setShowAlert(true);
+    setSuccessMessage('Breed added successfully!');
+  };
 
-//   const openPetModal = (type, pet = null) => {
-//     setModalType(type);
-//     setShowPetModal(true);
-//     // Existing code for opening pet modal...
-//   };
+  return (
+    <>
+      <Container>
+        <div className="d-flex justify-content-between align-items-center mt-4">
+          <h1>Dashboard</h1>
+          <div>
+            <Button variant="primary" onClick={() => setShowSpeciesModal(true)}>Add Species</Button>
+            <Button variant="success" onClick={() => setShowBreedModal(true)}>Add Breed</Button>
+            <Button variant="info" onClick={() => setShowOwnerModal(true)}>Add Owner</Button>
+          </div>
+        </div>
+        <div className="mt-5">
+          <Form.Group controlId="filterType">
+            <Form.Label>Select Filter</Form.Label>
+            <Form.Control as="select" value={filterType} onChange={(e) => setFilterType(e.target.value)}>
+              <option value="pets">Pets</option>
+              <option value="species">Species</option>
+              <option value="breeds">Breeds</option>
+              <option value="owners">Owners</option>
+            </Form.Control>
+          </Form.Group>
+        </div>
 
-//   const openOwnerModal = () => {
-//     setShowOwnerModal(true);
-//   };
+        {/* Alert for success messages */}
+        {showAlert && (
+          <Alert variant="success" onClose={() => setShowAlert(false)} dismissible>
+            {successMessage}
+          </Alert>
+        )}
 
-//   const openSpeciesModal = () => {
-//     setShowSpeciesModal(true);
-//   };
+        {/* Display Area */}
+        <div className="mt-5">
+          {filterType === 'pets' && (
+            <Table striped bordered hover>
+              <thead>
+                <tr>
+                  <th>Pet Name</th>
+                  <th>Species</th>
+                  <th>Breed</th>
+                  <th>Date of Birth</th>
+                  <th>Owner</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pets.map((pet) => (
+                  <tr key={pet.PetID}>
+                    <td>{pet.PetName}</td>
+                    <td>{species.find(s => s.SpeciesID === pet.SpeciesID)?.SpeciesName}</td>
+                    <td>{breeds.find(b => b.BreedID === pet.BreedID)?.BreedName}</td>
+                    <td>{pet.DateOfBirth}</td>
+                    <td>{owners.find(o => o.OwnerID === pet.OwnerID)?.OwnerName}</td>
+                    <td>
+                      <Button variant="warning" onClick={() => { setFormData(pet); setShowPetModal(true); }}>
+                        Edit
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          )}
+          {filterType === 'species' && (
+            <Table striped bordered hover>
+              <thead>
+                <tr>
+                  <th>Species Name</th>
+                </tr>
+              </thead>
+              <tbody>
+                {species.map((s) => (
+                  <tr key={s.SpeciesID}>
+                    <td>{s.SpeciesName}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          )}
+          {filterType === 'breeds' && (
+            <Table striped bordered hover>
+              <thead>
+                <tr>
+                  <th>Breed Name</th>
+                  <th>Species</th>
+                </tr>
+              </thead>
+              <tbody>
+                {breeds.map((b) => (
+                  <tr key={b.BreedID}>
+                    <td>{b.BreedName}</td>
+                    <td>{species.find(s => s.SpeciesID === b.SpeciesID)?.SpeciesName}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          )}
+          {filterType === 'owners' && (
+            <Table striped bordered hover>
+              <thead>
+                <tr>
+                  <th>Owner Name</th>
+                  <th>Contact Details</th>
+                  <th>Address</th>
+                </tr>
+              </thead>
+              <tbody>
+                {owners.map((o) => (
+                  <tr key={o.OwnerID}>
+                    <td>{o.OwnerName}</td>
+                    <td>{o.OwnerContactDetails}</td>
+                    <td>{o.OwnerAddress}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          )}
+        </div>
 
-//   const openBreedModal = () => {
-//     setShowBreedModal(true);
-//   };
+        {/* Pet Modal */}
+        <Modal show={showPetModal} onHide={() => setShowPetModal(false)}>
+          <Modal.Header closeButton>
+            <Modal.Title>{formData.PetID ? 'Edit Pet' : 'Add Pet'}</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Form onSubmit={handleAddOrEditPet}>
+              <Form.Group controlId="petName">
+                <Form.Label>Pet Name</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Enter pet name"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                />
+              </Form.Group>
+              <Form.Group controlId="speciesID">
+                <Form.Label>Species</Form.Label>
+                <Form.Control
+                  as="select"
+                  value={formData.speciesID}
+                  onChange={(e) => setFormData({ ...formData, speciesID: e.target.value })}
+                >
+                  <option value="">Select Species</option>
+                  {species.map((species) => (
+                    <option key={species.SpeciesID} value={species.SpeciesID}>
+                      {species.SpeciesName}
+                    </option>
+                  ))}
+                </Form.Control>
+              </Form.Group>
+              <Form.Group controlId="breedID">
+                <Form.Label>Breed</Form.Label>
+                <Form.Control
+                  as="select"
+                  value={formData.breedID}
+                  onChange={(e) => setFormData({ ...formData, breedID: e.target.value })}
+                >
+                  <option value="">Select Breed</option>
+                  {breeds.map((breed) => (
+                    <option key={breed.BreedID} value={breed.BreedID}>
+                      {breed.BreedName}
+                    </option>
+                  ))}
+                </Form.Control>
+              </Form.Group>
+              <Form.Group controlId="dateOfBirth">
+                <Form.Label>Date of Birth</Form.Label>
+                <Form.Control
+                  type="date"
+                  value={formData.dateOfBirth}
+                  onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
+                />
+              </Form.Group>
+              <Form.Group controlId="ownerID">
+                <Form.Label>Owner</Form.Label>
+                <Form.Control
+                  as="select"
+                  value={formData.ownerID}
+                  onChange={(e) => setFormData({ ...formData, ownerID: e.target.value })}
+                >
+                  <option value="">Select Owner</option>
+                  {owners.map((owner) => (
+                    <option key={owner.OwnerID} value={owner.OwnerID}>
+                      {owner.OwnerName}
+                    </option>
+                  ))}
+                </Form.Control>
+              </Form.Group>
+              <Button variant="primary" type="submit">
+                {formData.PetID ? 'Update Pet' : 'Add Pet'}
+              </Button>
+            </Form>
+          </Modal.Body>
+        </Modal>
 
-//   return (
-//     <>
-//       <Container>
-//         <div>
-//           <h1>Dashboard Sakong Maderpakening Pet's Info</h1>
-//           <Button variant="primary" onClick={() => openPetModal('add')}>Add Pet</Button>
-//           <p>Or</p>
-//           <Button variant="secondary" onClick={openOwnerModal}>Add Owner</Button>
-//           <p>Or</p>
-//           <Button variant="info" onClick={openSpeciesModal}>Add Species</Button>
-//           <p>Or</p>
-//           <Button variant="info" onClick={openBreedModal}>Add Breed</Button>
-//           <h1>Akong Pet Info</h1>
-//           <table className="table">
-//             <thead>
-//               {/* Table headers */}
-//             </thead>
-//             <tbody>
-//               {/* Table rows */}
-//             </tbody>
-//           </table>
+        {/* Owner Modal */}
+        <Modal show={showOwnerModal} onHide={() => setShowOwnerModal(false)}>
+          <Modal.Header closeButton>
+            <Modal.Title>Add Owner</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Form onSubmit={handleAddOwner}>
+              <Form.Group controlId="ownerName">
+                <Form.Label>Owner Name</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Enter owner name"
+                  value={ownerFormData.ownerName}
+                  onChange={(e) => setOwnerFormData({ ...ownerFormData, ownerName: e.target.value })}
+                />
+              </Form.Group>
+              <Form.Group controlId="ownerContactDetails">
+                <Form.Label>Contact Details</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Enter contact details"
+                  value={ownerFormData.ownerContactDetails}
+                  onChange={(e) => setOwnerFormData({ ...ownerFormData, ownerContactDetails: e.target.value })}
+                />
+              </Form.Group>
+              <Form.Group controlId="ownerAddress">
+                <Form.Label>Address</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Enter address"
+                  value={ownerFormData.ownerAddress}
+                  onChange={(e) => setOwnerFormData({ ...ownerFormData, ownerAddress: e.target.value })}
+                />
+              </Form.Group>
+              <Button variant="primary" type="submit">
+                Add Owner
+              </Button>
+            </Form>
+          </Modal.Body>
+        </Modal>
 
-//           {/* Pet Modal */}
-//           {/* Existing code for Pet Modal... */}
+        {/* Species Modal */}
+        <Modal show={showSpeciesModal} onHide={() => setShowSpeciesModal(false)}>
+          <Modal.Header closeButton>
+            <Modal.Title>Add Species</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Form onSubmit={handleAddSpecies}>
+              <Form.Group controlId="speciesName">
+                <Form.Label>Species Name</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Enter species name"
+                  value={speciesFormData.speciesName}
+                  onChange={(e) => setSpeciesFormData({ ...speciesFormData, speciesName: e.target.value })}
+                />
+              </Form.Group>
+              <Button variant="primary" type="submit">
+                Add Species
+              </Button>
+            </Form>
+          </Modal.Body>
+        </Modal>
 
-//           {/* Owner Modal */}
-//           {/* Existing code for Owner Modal... */}
-
-//           {/* Species Modal */}
-//           <Modal show={showSpeciesModal} onHide={() => setShowSpeciesModal(false)}>
-//             <Modal.Header closeButton>
-//               <Modal.Title>Add Species</Modal.Title>
-//             </Modal.Header>
-//             <Modal.Body>
-//               {showAlert && <Alert variant="success">{successMessage}</Alert>}
-//               <Form onSubmit={handleAddSpecies}>
-//                 <Form.Group controlId="formSpeciesName">
-//                   <Form.Label>Species Name</Form.Label>
-//                   <Form.Control
-//                     type="text"
-//                     name="speciesName"
-//                     placeholder="Species Name"
-//                     value={speciesFormData.speciesName}
-//                     onChange={(e) => setSpeciesFormData({ ...speciesFormData, speciesName: e.target.value })}
-//                   />
-//                 </Form.Group>
-//                 <Button variant="primary" type="submit">
-//                   Add Species
-//                 </Button>
-//               </Form>
-//             </Modal.Body>
-//             <Modal.Footer>
-//               <Button variant="secondary" onClick={() => setShowSpeciesModal(false)}>
-//                 Close
-//               </Button>
-//             </Modal.Footer>
-//           </Modal>
-
-//           {/* Breed Modal */}
-//           <Modal show={showBreedModal} onHide={() => setShowBreedModal(false)}>
-//             <Modal.Header closeButton>
-//               <Modal.Title>Add Breed</Modal.Title>
-//             </Modal.Header>
-//             <Modal.Body>
-//               {showAlert && <Alert variant="success">{successMessage}</Alert>}
-//               <Form onSubmit={handleAddBreed}>
-//                 <Form.Group controlId="formBreedName">
-//                   <Form.Label>Breed Name</Form.Label>
-//                   <Form.Control
-//                     type="text"
-//                     name="breedName"
-//                     placeholder="Breed Name"
-//                     value={breedFormData.breedName}
-//                     onChange={(e) => setBreedFormData({ ...breedFormData, breedName: e.target.value })}
-//                   />
-//                 </Form.Group>
-//                 <Form.Group controlId="formSpecies">
-//                   <Form.Label>Species</Form.Label>
-//                   <Form.Control
-//                     as="select"
-//                     name="speciesID"
-//                     value={breedFormData.speciesID}
-//                     onChange={(e) => setBreedFormData({ ...breedFormData, speciesID: e.target.value })}
-//                   >
-//                     <option value="">Select Species</option>
-//                     {species.map((sp) => (
-//                       <option key={sp.SpeciesID} value={sp.SpeciesID}>
-//                         {sp.SpeciesName}
-//                       </option>
-//                     ))}
-//                   </Form.Control>
-//                 </Form.Group>
-//                 <Button variant="primary" type="submit">
-//                   Add Breed
-//                 </Button>
-//               </Form>
-//             </Modal.Body>
-//             <Modal.Footer>
-//               <Button variant="secondary" onClick={() => setShowBreedModal(false)}>
-//                 Close
-//               </Button>
-//             </Modal.Footer>
-//           </Modal>
-
-//         </div>
-//       </Container>
-//     </>
-//   );
-// }
+        {/* Breed Modal */}
+        <Modal show={showBreedModal} onHide={() => setShowBreedModal(false)}>
+          <Modal.Header closeButton>
+            <Modal.Title>Add Breed</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Form onSubmit={handleAddBreed}>
+              <Form.Group controlId="breedName">
+                <Form.Label>Breed Name</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Enter breed name"
+                  value={breedFormData.breedName}
+                  onChange={(e) => setBreedFormData({ ...breedFormData, breedName: e.target.value })}
+                />
+              </Form.Group>
+              <Form.Group controlId="speciesID">
+                <Form.Label>Species</Form.Label>
+                <Form.Control
+                  as="select"
+                  value={breedFormData.speciesID}
+                  onChange={(e) => setBreedFormData({ ...breedFormData, speciesID: e.target.value })}
+                >
+                  <option value="">Select Species</option>
+                  {species.map((s) => (
+                    <option key={s.SpeciesID} value={s.SpeciesID}>
+                      {s.SpeciesName}
+                    </option>
+                  ))}
+                </Form.Control>
+              </Form.Group>
+              <Button variant="primary" type="submit">
+                Add Breed
+              </Button>
+            </Form>
+          </Modal.Body>
+        </Modal>
+      </Container>
+    </>
+  );
+}

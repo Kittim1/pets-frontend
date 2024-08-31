@@ -5,7 +5,9 @@ import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import Alert from 'react-bootstrap/Alert';
 import { Container } from 'react-bootstrap';
-import './globals.css'; 
+import './globals.css';
+import { toast } from 'sonner';
+import axios from 'axios';
 
 export default function Dashboard() {
   const [pets, setPets] = useState([]);
@@ -55,153 +57,191 @@ export default function Dashboard() {
     }
   };
 
-  const fetchPets = () => {
-    fetch('http://localhost/api/assignment3/pets.php?action=getPets')
-      .then((response) => response.json())
-      .then((data) => setPets(data))
-      .catch((error) => console.error('Error:', error));
-  };
-
-  const fetchSpecies = async () => {
+  const fetchPets = async () => {
     try {
-      const response = await fetch('http://localhost/api/assignment3/pets.php?action=getSpecies');
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
+      const url = 'http://localhost/api/assignment3/pets.php';
+      const formData = new FormData();
+      formData.append("operation", "getPetDetails");
+      const res = await axios.post(url, formData);
+      console.log("RES NI FETCH PETS", res.data)
+      if (res.data !== 0) {
+        setPets(res.data)
       }
-      const data = await response.json();
-      setSpecies(data);
+
     } catch (error) {
-      console.error('Error:', error);
+      toast.error("walay network")
+      console.log(error)
+
     }
   };
 
-  const fetchBreeds = () => {
-    fetch('http://localhost/api/assignment3/pets.php?action=getBreeds')
-      .then((response) => response.json())
-      .then((data) => setBreeds(data))
-      .catch((error) => console.error('Error:', error));
+
+  useEffect(() => {
+    const fetchSpecies = async () => {
+      try {
+        const formData = new FormData();
+        formData.append("operation", "getSpeciesDetails");
+        const response = await axios.post("http://localhost/api/assignment3/pets.php", formData);
+        console.log("Response Data:", response.data);
+
+        const speciesData = response.data !== 0 ? response.data : [];
+        setSpecies(speciesData);
+      } catch (error) {
+        console.error("Error fetching species data:", error);
+      }
+    };
+
+    fetchSpecies();
+    fetchOwners();
+  }, []);
+  useEffect(() => {
+    const fetchBreeds = async () => {
+      try {
+        const formData = new FormData();
+        formData.append("operation", "getBreedDetails");
+        const response = await axios.post("http://localhost/api/assignment3/pets.php", formData);
+        console.log("Response Data ni fetchbreed:", response.data);
+
+        const breedData = response.data !== 0 ? response.data : [];
+        setBreeds(breedData);
+      } catch (error) {
+        console.error("Error fetching breed data:", error);
+      }
+    };
+    fetchBreeds();
+  }, []);
+
+
+
+  const fetchOwners = async () => {
+    try {
+      const url = 'http://localhost/api/assignment3/pets.php';
+      const formData = new FormData();
+      formData.append("operation", "getOwnerDetails");
+      const res = await axios.post(url, formData);
+      console.log("resdata ni fetchowners:", res.data)
+      if (res.data !== 0) {
+        setOwners(res.data);
+      }
+
+    } catch (error) {
+      toast.error("walay network")
+      console.log(error)
+
+    }
   };
 
-  const fetchOwners = () => {
-    fetch('http://localhost/api/assignment3/pets.php?action=getOwners')
-      .then((response) => response.json())
-      .then((data) => setOwners(data))
-      .catch((error) => console.error('Error:', error));
-  };
-
-  const handleAddOrEditPet = (e) => {
+  const handleAddOrEditPet = async (e) => {
     e.preventDefault();
-    const action = modalType === 'add' ? 'addPet' : 'editPet';
+    try {
+      const url = 'http://localhost/api/assignment3/pets.php';
+      const jsonData = {
+        pet_name: formData.name,
+        species_id: formData.speciesID,
+        breed_id: formData.breedID,
+        date_of_birth: formData.dateOfBirth,
+        owner_id: formData.ownerID
+      }
+      console.log("JSON DATA NI ADDSPEssssCIES:", JSON.stringify(jsonData))
+      const formDatas = new FormData();
+      formDatas.append("json", JSON.stringify(jsonData));
+      formDatas.append("operation", "addPets");
+      const res = await axios.post(url, formDatas);
+      console.log("res.data ni add Pets", res)
+      if (res.data === 1) {
+        toast.success('Pet added successfully!');
+      }
 
-    fetch(`http://localhost/api/assignment3/pets.php?action=${action}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams(formData),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.success) {
-          fetchPets();
-          setSuccessMessage(`${modalType === 'add' ? 'Yehey! Added' : 'Yehey! Edited'} pet successfully!`);
-          setShowAlert(true);
-          setShowPetModal(false);
-          setFormData({
-            name: '',
-            speciesID: '',
-            breedID: '',
-            dateOfBirth: '',
-            ownerID: '',
-          });
-        } else {
-          alert(`Failed to ${modalType === 'add' ? 'add' : 'edit'} pet`);
-        }
-      })
-      .catch((error) => console.error('Error:', error));
-  };
+    } catch (error) {
+      toast.error("walay networks111")
+      console.log("error", error)
 
-  const handleAddOwner = (e) => {
-    e.preventDefault();
+    }
+  }
 
-    fetch('http://localhost/api/assignment3/pets.php?action=addOwner', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams(ownerFormData),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.success) {
-          fetchOwners();
-          setSuccessMessage('Owner added successfully!');
-          setShowAlert(true);
-          setShowOwnerModal(false);
-          setOwnerFormData({
-            ownerName: '',
-            ownerContactDetails: '',
-            ownerAddress: '',
-          });
-        } else {
-          alert('Failed to add owner');
-        }
-      })
-      .catch((error) => console.error('Error:', error));
-  };
 
-  const handleAddSpecies = (e) => {
-    e.preventDefault();
 
-    fetch('http://localhost/api/assignment3/pets.php?action=addSpecies', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams(speciesFormData),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.success) {
-          fetchSpecies();
-          setSuccessMessage('Species added successfully!');
-          setShowAlert(true);
-          setShowSpeciesModal(false);
-          setSpeciesFormData({
-            speciesName: '',
-          });
-        } else {
-          alert('Failed to add species');
-        }
-      })
-      .catch((error) => console.error('Error:', error));
-  };
-
-  const handleAddBreed = (e) => {
+  const handleAddOwner = async (e) => {
     e.preventDefault();
 
-    fetch('http://localhost/api/assignment3/pets.php?action=addBreed', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams(breedFormData),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.success) {
-          fetchBreeds();
-          setSuccessMessage('Breed added successfully!');
-          setShowAlert(true);
-          setShowBreedModal(false);
-          setBreedFormData({
-            breedName: '',
-          });
-        } else {
-          alert('Failed to add breed');
-        }
-      })
-      .catch((error) => console.error('Error:', error));
+    try {
+      const url = 'http://localhost/api/assignment3/pets.php';
+      const jsonData = {
+        owner_name: ownerFormData.ownerName,
+        owner_contact_details: ownerFormData.ownerContactDetails,
+        owner_address: ownerFormData.ownerAddress
+
+      }
+      console.log("JSON DATA NI ADDowner:", JSON.stringify(jsonData))
+      const formData = new FormData();
+      formData.append("json", JSON.stringify(jsonData));
+      formData.append("operation", "addOwners");
+      const res = await axios.post(url, formData);
+      console.log(res.data)
+      if (res.data === 1) {
+        toast.success('Owner added successfully!');
+      }
+
+    } catch (error) {
+      toast.error("walay network")
+      console.log(error)
+
+    }
+  }
+
+
+  const handleAddSpecies = async (e) => {
+    e.preventDefault();
+
+    try {
+      const url = 'http://localhost/api/assignment3/pets.php';
+      const jsonData = {
+        species_name: speciesFormData.speciesName
+      }
+      console.log("JSON DATA NI ADDSPECIES:", JSON.stringify(jsonData))
+      const formData = new FormData();
+      formData.append("json", JSON.stringify(jsonData));
+      formData.append("operation", "addSpecies");
+      const res = await axios.post(url, formData);
+      console.log("res.data ni add species", res)
+      if (res.data === 1) {
+        toast.success('Species added successfully!');
+      }
+
+    } catch (error) {
+      toast.error("walay network")
+      console.log(error)
+
+    }
+  }
+
+
+
+  const handleAddBreed = async (e) => {
+    e.preventDefault();
+    try {
+      const url = 'http://localhost/api/assignment3/pets.php';
+      const jsonData = {
+        breed_name: breedFormData.breedName,
+        species_id: breedFormData.speciesID
+      }
+      console.log("JSON DATA NI ADDBREED:", JSON.stringify(jsonData))
+      const formDatas = new FormData();
+      formDatas.append("json", JSON.stringify(jsonData));
+      formDatas.append("operation", "addBreeds");
+      const res = await axios.post(url, formDatas);
+      console.log(res.data)
+      if (res.data === 1) {
+        toast.success('Breed added successfully!');
+      }
+
+    } catch (error) {
+      toast.error("walay network")
+      console.log(error)
+
+    }
+
+
   };
 
   const openPetModal = (type, pet = null) => {
@@ -239,19 +279,22 @@ export default function Dashboard() {
     setShowBreedModal(true);
   };
 
+
+
+
   return (
     <>
-      <Container className="mt-5" style={{ background: 'linear-gradient(to bottom, #001f3f, #001845)', padding: '5px', minHeight: '100vh' }}>
+      <Container className="mt-5" style={{ background: 'linear-gradient(to bottom, #808080  , #B2BEB5)', padding: '5px', minHeight: '100vh' }}>
         <div>
-          <h1 className="text-center" style={{ color: 'white' }}>Moy's PetShop Daw</h1>
+          <h1 className="text-center" style={{ color: 'white' }}>my maderpakening Pets</h1>
           <div className='button-container'>
             <Button variant="primary" onClick={() => openPetModal('add')}>Add Pet</Button>
-            <Button variant="secondary" onClick={openOwnerModal}>Add Owner</Button>
-            <Button variant="info" onClick={openSpeciesModal}>Add Species</Button>
-            <Button variant="success" onClick={openBreedModal}>Add Breed</Button>
+            <Button variant="primary" onClick={openOwnerModal}>Add Owner</Button>
+            <Button variant="primary" onClick={openSpeciesModal}>Add Species</Button>
+            <Button variant="primary  " onClick={openBreedModal}>Add Breed</Button>
           </div>
-          {/* Filter Dropdown */}
-          <Form.Group controlId="filterType">
+          { }
+          {/* <Form.Group controlId="filterType">
             <Form.Label>Filter By</Form.Label>
             <Form.Control
               as="select"
@@ -263,7 +306,7 @@ export default function Dashboard() {
               <option value="breeds">Breeds</option>
               <option value="owners">Owners</option>
             </Form.Control>
-          </Form.Group>
+          </Form.Group> */}
 
           <h1 className="text-center" style={{ color: 'white' }}>Akong Pet Info</h1>
 
@@ -281,13 +324,13 @@ export default function Dashboard() {
                 </tr>
               </thead>
               <tbody>
-                {pets.map((pet) => (
-                  <tr key={pet.PetID}>
-                    <td>{pet.OwnerName}</td>
-                    <td>{pet.PetName}</td>
-                    <td>{pet.SpeciesName}</td>
-                    <td>{pet.BreedName}</td>
-                    <td>{pet.DateOfBirth}</td>
+                {pets.map((pet,index) => (
+                  <tr key={index}>
+                    <td>{pet.owner_name}</td>
+                    <td>{pet.pet_name}</td>
+                    <td>{pet.species_name}</td>
+                    <td>{pet.breed_name}</td>
+                    <td>{pet.date_of_birth}</td>
                     <td>
                       <Button variant="secondary" onClick={() => openPetModal('edit', pet)}>Edit</Button>
                     </td>
@@ -384,8 +427,8 @@ export default function Dashboard() {
               >
                 <option value="">Select species</option>
                 {species.map((s) => (
-                  <option key={s.SpeciesID} value={s.SpeciesID}>
-                    {s.SpeciesName}
+                  <option key={s.species_id} value={s.species_id}>
+                    {s.species_name}
                   </option>
                 ))}
               </Form.Control>
@@ -398,9 +441,9 @@ export default function Dashboard() {
                 onChange={(e) => setFormData({ ...formData, breedID: e.target.value })}
               >
                 <option value="">Select breed</option>
-                {breeds.map((b) => (
-                  <option key={b.BreedID} value={b.BreedID}>
-                    {b.BreedName}
+                {breeds && breeds.map((b) => (
+                  <option key={b.breed_id} value={b.breed_id}>
+                    {b.breed_name}
                   </option>
                 ))}
               </Form.Control>
@@ -423,8 +466,8 @@ export default function Dashboard() {
               >
                 <option value="">Select owner</option>
                 {owners.map((o) => (
-                  <option key={o.OwnerID} value={o.OwnerID}>
-                    {o.OwnerName}
+                  <option key={o.owner_id} value={o.owner_id}>
+                    {o.owner_name}
                   </option>
                 ))}
               </Form.Control>
@@ -507,11 +550,22 @@ export default function Dashboard() {
             <Form.Group controlId="breedName">
               <Form.Label>Breed Name</Form.Label>
               <Form.Control
+                className='mb-3'
                 type="text"
                 placeholder="Enter breed name"
                 value={breedFormData.breedName}
                 onChange={(e) => setBreedFormData({ ...breedFormData, breedName: e.target.value })}
               />
+
+              <Form.Select className='3-m' onChange={(e) => setBreedFormData({ ...breedFormData, speciesID: e.target.value })}>
+                <option value="">Select species</option>
+                {species.map((species) => (
+                  <option key={species.species_id} value={species.species_id}>
+                    {species.species_name}
+                  </option>
+                ))}
+              </Form.Select>
+
             </Form.Group>
             <Button variant="primary" type="submit">
               Add Breed
